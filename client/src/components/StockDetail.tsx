@@ -84,7 +84,7 @@ function StatBox({ label, value, sub }: { label: string; value: string; sub?: st
 export default function StockDetail({ quote }: StockDetailProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [news, setNews] = useState<NewsItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const isUp = (quote.changePercent ?? 0) >= 0;
   const shariah = getShariahInfo(quote.symbol);
 

@@ -1,11 +1,10 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-import { fetchCandles } from '../utils/api';
 import type { Candle } from '../types';
 
 interface ChartProps {
   symbol: string;
-  currentPrice: number;
+  currentPrice?: number;
   isUp: boolean;
 }
 
@@ -45,7 +44,7 @@ const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<
   );
 };
 
-export default function Chart({ symbol, currentPrice, isUp }: ChartProps) {
+export default function Chart({ symbol, isUp }: ChartProps) {
   const [data, setData] = useState<ChartPoint[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeRes, setActiveRes] = useState(1); // default 1M
