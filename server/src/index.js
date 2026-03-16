@@ -2,19 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const WebSocket = require('ws');
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
-if (!FINNHUB_API_KEY || FINNHUB_API_KEY === 'your_api_key_here') {
-  console.error('\n⚠️  FINNHUB_API_KEY not set!');
-  console.error('   1. Go to https://finnhub.io/register (free)');
-  console.error('   2. Copy your API key');
-  console.error('   3. Edit stock-market-app/server/.env and set FINNHUB_API_KEY=your_key\n');
-}
 
 // Popular stocks to track
 const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'AMD', 'NFLX', 'JPM'];
@@ -64,8 +56,24 @@ async function fetchQuotesBatch(symbols) {
 
 async function fetchProfile(symbol) {
   try {
-    const res = await axios.get(`https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
-    return res.data;
+    const res = await axios.get(
+      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=assetProfile,price`,
+      { headers: YF_HEADERS }
+    );
+    const result = res.data?.quoteSummary?.result?.[0];
+    if (!result) return {};
+    const { assetProfile = {}, price = {} } = result;
+    const website = assetProfile.website || '';
+    const domain = website.replace(/^https?:\/\//, '').replace(/\/$/, '').split('/')[0];
+    return {
+      name: price.longName || price.shortName || symbol,
+      exchange: price.exchangeName || '',
+      finnhubIndustry: assetProfile.industry || '',
+      marketCapitalization: price.marketCap?.raw ? price.marketCap.raw / 1_000_000 : undefined,
+      country: assetProfile.country || '',
+      weburl: website,
+      logo: domain ? `https://logo.clearbit.com/${domain}` : '',
+    };
   } catch (err) {
     return {};
   }
@@ -132,13 +140,19 @@ async function searchSymbol(query) {
 
 async function fetchNews(symbol) {
   try {
-    const now = new Date();
-    const from = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const to = now.toISOString().split('T')[0];
     const res = await axios.get(
-      `https://finnhub.io/api/v1/company-news?symbol=${symbol}&from=${from}&to=${to}&token=${FINNHUB_API_KEY}`
+      `https://query2.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(symbol)}&quotesCount=0&newsCount=5`,
+      { headers: YF_HEADERS }
     );
-    return (res.data || []).slice(0, 5);
+    const items = res.data?.news || [];
+    return items.map((item, i) => ({
+      id: i,
+      headline: item.title,
+      source: item.publisher,
+      url: item.link,
+      datetime: item.providerPublishTime,
+      image: item.thumbnail?.resolutions?.[0]?.url || '',
+    }));
   } catch (err) {
     return [];
   }
@@ -146,7 +160,7 @@ async function fetchNews(symbol) {
 
 // Routes
 app.get('/api/status', (req, res) => {
-  res.json({ apiKeySet: !!(FINNHUB_API_KEY && FINNHUB_API_KEY !== 'your_api_key_here') });
+  res.json({ apiKeySet: true });
 });
 
 app.get('/api/quotes', async (req, res) => {
