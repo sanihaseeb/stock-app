@@ -1,0 +1,12 @@
+{
+  "name": "stock-market-app",
+  "version": "1.0.0",
+  "scripts": {
+    "server": "cd server && node src/index.js",
+    "client": "cd client && npm run dev",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
