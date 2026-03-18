@@ -128,7 +128,7 @@ export default function StockDetail({ quote }: StockDetailProps) {
           pointerEvents: 'none',
         }} />
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+        <div className="detail-header-content">
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             {profile?.logo && (
               <img src={profile.logo} alt="" style={{ width: 44, height: 44, borderRadius: 10, objectFit: 'contain', background: '#fff', padding: 4 }} />
@@ -161,7 +161,7 @@ export default function StockDetail({ quote }: StockDetailProps) {
             </div>
           </div>
 
-          <div style={{ textAlign: 'right' }}>
+          <div className="detail-price-block">
             <div style={{
               fontFamily: 'var(--mono)',
               fontSize: 32,

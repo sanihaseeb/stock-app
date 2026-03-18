@@ -54,7 +54,7 @@ export default function Search({ onSelect }: SearchProps) {
   }, []);
 
   return (
-    <div className="search-wrap" style={{ position: 'relative', width: 280 }}>
+    <div className="search-wrap" style={{ position: 'relative' }}>
       <div style={{
         display: 'flex',
         alignItems: 'center',

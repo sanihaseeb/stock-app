@@ -107,3 +107,115 @@ body {
   animation: blink 1.5s infinite;
   display: inline-block;
 }
+
+/* ===== LAYOUT ===== */
+.app-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-sidebar {
+  width: 280px;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+/* ===== HEADER ===== */
+.header-center {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-live-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mobile-back-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-family: var(--font);
+  transition: all 0.15s;
+}
+.mobile-back-btn:active { background: var(--surface3); }
+
+/* ===== STOCK DETAIL ===== */
+.detail-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.detail-price-block { text-align: right; }
+
+/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+  /* Header */
+  .header-center { display: none; }
+  .header-live-status { display: none; }
+  .mobile-back-btn { display: flex; }
+
+  /* Layout: stack sidebar above main */
+  .app-body {
+    flex-direction: column;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .app-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    flex: 1;
+    overflow-y: auto;
+  }
+  .app-sidebar.mobile-hidden { display: none; }
+
+  .app-main {
+    padding: 12px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .app-main.mobile-hidden { display: none; }
+}
+
+/* ===== SEARCH ===== */
+.search-wrap { width: 280px; }
+
+@media (max-width: 768px) {
+  .search-wrap { width: 160px; }
+}
+
+@media (max-width: 480px) {
+  .search-wrap { width: 130px; }
+  .detail-header-content { flex-direction: column; }
+  .detail-price-block { text-align: left; }
+  .app-main { padding: 10px; }
+}

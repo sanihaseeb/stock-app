@@ -6,8 +6,19 @@ import StockCard from './components/StockCard';
 import StockDetail from './components/StockDetail';
 import Ticker from './components/Ticker';
 import Search from './components/Search';
-import { DollarSign, BarChart2, RefreshCw, AlertTriangle } from 'lucide-react';
+import { DollarSign, BarChart2, RefreshCw, AlertTriangle, ChevronLeft } from 'lucide-react';
 import { getShariahInfo } from './utils/shariahData';
+
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 768);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 768px)');
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return isMobile;
+}
 
 const DEFAULT_SYMBOLS = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'AMD', 'NFLX', 'JPM'];
 
@@ -20,7 +31,9 @@ export default function App() {
   const [customSymbols, setCustomSymbols] = useState<string[]>([]);
   const [apiKeySet, setApiKeySet] = useState<boolean | null>(null);
   const [shariahFilter, setShariahFilter] = useState(false);
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
   const quotesRef = useRef<Quote[]>([]);
+  const isMobile = useIsMobile();
 
   const allSymbols = [...DEFAULT_SYMBOLS, ...customSymbols.filter(s => !DEFAULT_SYMBOLS.includes(s))];
 
@@ -105,6 +118,7 @@ export default function App() {
         quotesRef.current = [...quotesRef.current, data];
       }
     }
+    setMobileView('detail');
   };
 
   const totalGain = quotes.reduce((sum, q) => sum + (q.changePercent ?? 0), 0);
@@ -117,7 +131,7 @@ export default function App() {
       <header style={{
         background: 'var(--surface)',
         borderBottom: '1px solid var(--border)',
-        padding: '0 24px',
+        padding: '0 16px',
         height: 60,
         display: 'flex',
         alignItems: 'center',
@@ -126,35 +140,49 @@ export default function App() {
         top: 0,
         zIndex: 50,
         backdropFilter: 'blur(10px)',
+        gap: 8,
       }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 8,
-            background: 'linear-gradient(135deg, #00d4a0, #2563eb)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 16px rgba(0,212,160,0.3)',
-          }}>
-            <DollarSign size={18} color="#fff" strokeWidth={2.5} />
-          </div>
-          <div>
-            <div style={{
-              fontWeight: 700, fontSize: 16, color: 'var(--text-bright)',
-              background: 'linear-gradient(90deg, #00d4a0, #2563eb)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-0.02em',
-            }}>
-              StockPulse
-            </div>
-            <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: -2, letterSpacing: '0.05em' }}>
-              LIVE MARKETS
-            </div>
-          </div>
+        {/* Left: logo + mobile back button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+          {isMobile && mobileView === 'detail' ? (
+            <button
+              className="mobile-back-btn"
+              onClick={() => { setMobileView('list'); setSelected(null); }}
+            >
+              <ChevronLeft size={15} />
+              Watchlist
+            </button>
+          ) : (
+            <>
+              <div style={{
+                width: 34, height: 34, borderRadius: 8,
+                background: 'linear-gradient(135deg, #00d4a0, #2563eb)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 0 16px rgba(0,212,160,0.3)',
+                flexShrink: 0,
+              }}>
+                <DollarSign size={18} color="#fff" strokeWidth={2.5} />
+              </div>
+              <div>
+                <div style={{
+                  fontWeight: 700, fontSize: 16, color: 'var(--text-bright)',
+                  background: 'linear-gradient(90deg, #00d4a0, #2563eb)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  letterSpacing: '-0.02em',
+                }}>
+                  Staq
+                </div>
+                <div style={{ fontSize: 10, color: 'var(--text-dim)', marginTop: -2, letterSpacing: '0.05em' }}>
+                  LIVE MARKETS
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
-        {/* Center stats */}
-        <div style={{ display: 'flex', gap: 20, alignItems: 'center' }}>
+        {/* Center stats — hidden on mobile via CSS */}
+        <div className="header-center">
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 10, color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Gainers</div>
             <div style={{ fontFamily: 'var(--mono)', fontSize: 14, fontWeight: 600, color: 'var(--green)' }}>{gainers}</div>
@@ -173,10 +201,10 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right: search + status */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Right: search + live status + refresh */}
+        <div className="header-right">
           <Search onSelect={handleSelectSymbol} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div className="header-live-status">
             <div className="live-dot" />
             <span style={{ fontSize: 11, color: 'var(--text-dim)', fontFamily: 'var(--mono)' }}>
               {lastUpdate ? lastUpdate.toLocaleTimeString() : 'Connecting...'}
@@ -188,7 +216,7 @@ export default function App() {
               background: 'var(--surface2)', border: '1px solid var(--border)',
               borderRadius: 6, padding: '6px', cursor: 'pointer',
               color: 'var(--text-dim)', display: 'flex', alignItems: 'center',
-              transition: 'all 0.15s',
+              transition: 'all 0.15s', flexShrink: 0,
             }}
             title="Refresh"
           >
@@ -225,15 +253,9 @@ export default function App() {
       )}
 
       {/* Main content */}
-      <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-        {/* Sidebar */}
-        <aside style={{
-          width: 280,
-          borderRight: '1px solid var(--border)',
-          background: 'var(--surface)',
-          overflowY: 'auto',
-          flexShrink: 0,
-        }}>
+      <div className="app-body">
+        {/* Sidebar / Watchlist */}
+        <aside className={`app-sidebar${isMobile && mobileView === 'detail' ? ' mobile-hidden' : ''}`}>
           <div style={{
             padding: '10px 12px',
             borderBottom: '1px solid var(--border)',
@@ -314,7 +336,7 @@ export default function App() {
                       key={quote.symbol}
                       quote={quote}
                       selected={selected?.symbol === quote.symbol}
-                      onClick={() => setSelected(quote)}
+                      onClick={() => { setSelected(quote); setMobileView('detail'); }}
                     />
                   ))
             }
@@ -327,11 +349,11 @@ export default function App() {
         </aside>
 
         {/* Main panel */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
+        <main className={`app-main${isMobile && mobileView === 'list' ? ' mobile-hidden' : ''}`}>
           {selected ? (
             <StockDetail quote={selected} />
           ) : (
-            <EmptyState onPickRandom={() => quotes[0] && setSelected(quotes[0])} hasQuotes={quotes.length > 0} />
+            <EmptyState onPickRandom={() => { quotes[0] && setSelected(quotes[0]); setMobileView('detail'); }} hasQuotes={quotes.length > 0} />
           )}
         </main>
       </div>
