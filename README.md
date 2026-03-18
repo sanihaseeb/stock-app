@@ -98,7 +98,7 @@ The backend uses Yahoo Finance's undocumented chart API (no API key, no rate lim
 | Service | Purpose |
 |---|---|
 | GitHub Pages | Frontend hosting |
-| Render / Railway | Backend hosting |
+| Render | Backend hosting |
 
 ---
 
@@ -116,7 +116,7 @@ The backend uses Yahoo Finance's undocumented chart API (no API key, no rate lim
 └──────────────────┬───────────────────────┘
                    │ HTTP + WSS
 ┌──────────────────▼───────────────────────┐
-│         Render / Railway (Server)        │
+│              Render (Server)             │
 │           Express + ws + Node.js         │
 │                                          │
 │  REST API        WebSocket Server        │
@@ -208,7 +208,7 @@ The client reads the backend URL from:
 VITE_API_URL=http://localhost:3001
 ```
 
-For production, set `VITE_API_URL` to your Render/Railway domain before building.
+For production, set `VITE_API_URL` to your Render domain before building.
 
 ---
 
